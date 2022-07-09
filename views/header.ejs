@@ -1,0 +1,10 @@
+<nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand">Navbar</a>
+        <% if(typeof isAuthenticated !== 'undefined'){ %>
+            <% if(isAuthenticated){ %>
+                <a href="/logout" class="btn btn-danger btn-md">Logout</a>
+            <% } %>
+        <% } %>
+    </div>
+</nav>
