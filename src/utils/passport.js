@@ -17,11 +17,12 @@ module.exports.passportConfig = () => {
             }
             //console.log(res);
             const user = res.rows[0];
-            console.log('LocalStrategy . user.email:' + user.email);
             if (!user) {
                 console.log('LocalStrategy . !user');
                 console.log(res);              
                 return done(null, false, { message: "Invalid credentials.\n" });
+            }else{
+              console.log('LocalStrategy . user.email:' + user.email);
             }
             if (!bcrypt.compareSync(password, user.password)) {
                 console.log('LocalStrategy . password not matching');       
