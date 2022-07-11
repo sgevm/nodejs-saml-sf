@@ -50,13 +50,14 @@ redisClient.connect().then(()=>{
     app.use(
         session({
             store: new RedisStore({ client: redisClient }),
-            secret: SESSION_SECRET,
+            secret: 'crazy cat',
             resave: false,
             saveUninitialized: true,
             cookie: {
                 secure: true,//process.env.SESSION_SECURE_COOKIE,  // if true only transmit cookie over https
                 httpOnly: true, // if true prevent client side JS from reading the cookie
-                sameSite: 'none'
+                sameSite: 'none',
+                maxAge: 4 * 60 * 60 * 1000 // session max age in milliseconds. 4 Hours.
             }
         })
     );
