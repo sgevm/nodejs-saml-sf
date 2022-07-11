@@ -53,11 +53,12 @@ redisClient.connect().then(()=>{
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
-            cookie: {                
+            cookie: {
+                domain: process.env.NODE_ENV === "production"?"sg-nodejs-template.herokuapp.com":"localhost",
                 secure: process.env.NODE_ENV==="production",  // if true only transmit cookie over https
                 httpOnly: true, // if true prevent client side JS from reading the cookie
                 sameSite: 'none',
-                maxAge: 14400000 // session max age in milliseconds. 4 Hours 4*60*60*1000
+                maxAge: 14400000 // session max age in milliseconds. 4 Hours 94*60*60*1000
             }
         })
     );
