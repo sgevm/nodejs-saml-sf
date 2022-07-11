@@ -36,9 +36,9 @@ module.exports.passportConfig = () => {
  );
 
  passport.serializeUser((user, done) => {
-  console.log('passport.serializeUser');
-  console.log(user);
-   done(null, user.id);
+    console.log('passport.serializeUser');
+    console.log(user);
+    done(null, user.id);
  });
 
  passport.deserializeUser(async (id, done) => {

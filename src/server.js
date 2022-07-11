@@ -54,7 +54,7 @@ redisClient.connect().then(()=>{
         resave: false,
         saveUninitialized: true,
         cookie: {
-          secure: process.env.NODE_ENV!=='development',  // if true only transmit cookie over https
+          secure: process.env.SESSION_SECURE_COOKIE,  // if true only transmit cookie over https
           httpOnly: true, // if true prevent client side JS from reading the cookie
           maxAge: 4 * 60 * 60, // session max age in milliseconds. 4 Hours.
         }
