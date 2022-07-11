@@ -14,11 +14,7 @@ const router = express.Router();
 router.route("/").get(LoginPage);
 router.route("/register").get(registerPage);
 router.route("/home").get(HomePage);
-router.route("/api/v1/signin").post(function (req, res, next) {
-    console.log('/api/v1/signin...');
-    console.log(req.body);
-    next();
-    },
+router.route("/api/v1/signin").post(
     passport.authenticate("local", {
         failureRedirect: "/",
         successRedirect: "/home",
