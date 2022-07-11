@@ -45,16 +45,15 @@ redisClient.connect().then(()=>{
     
     //Configure session middleware
     passportConfig();
-    const SESSION_SECRET = process.env.SESSION_SECRET;
     
     app.use(
         session({
             store: new RedisStore({ client: redisClient }),
-            secret: 'crazy cat',
+            secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
             cookie: {
-                secure: true,//process.env.SESSION_SECURE_COOKIE,  // if true only transmit cookie over https
+                secure: (process.env.SESSION_SECURE_COOKIE==="true"),  // if true only transmit cookie over https
                 httpOnly: true, // if true prevent client side JS from reading the cookie
                 sameSite: 'none',
                 maxAge: 4 * 60 * 60 * 1000 // session max age in milliseconds. 4 Hours.
