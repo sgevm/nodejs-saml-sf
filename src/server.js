@@ -46,7 +46,7 @@ redisClient.connect().then(()=>{
     //Configure session middleware
     passportConfig();
     
-    app.set('trust proxy', 1);    
+    //app.set('trust proxy', 1);    
     app.use(
         session({
             store: new RedisStore({ client: redisClient }),
