@@ -57,7 +57,7 @@ redisClient.connect().then(()=>{
                 secure: true,//process.env.SESSION_SECURE_COOKIE,  // if true only transmit cookie over https
                 httpOnly: true, // if true prevent client side JS from reading the cookie
                 sameSite: 'none',
-                maxAge: 4 * 60 * 60 * 1000, // session max age in milliseconds. 4 Hours.
+                maxAge: 4 * 60 * 60 * 1000 // session max age in milliseconds. 4 Hours.
             }
         })
     );
