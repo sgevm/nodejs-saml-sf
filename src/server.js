@@ -54,7 +54,7 @@ redisClient.connect().then(()=>{
             resave: false,
             saveUninitialized: true,
             cookie: {
-                domain: process.env.NODE_ENV === "production"?"sg-nodejs-template.herokuapp.com":"localhost",
+                domain: process.env.NODE_ENV === "production"?".sg-nodejs-template.herokuapp.com":"localhost",
                 secure: process.env.NODE_ENV==="production",  // if true only transmit cookie over https
                 httpOnly: true, // if true prevent client side JS from reading the cookie
                 sameSite: 'none',
