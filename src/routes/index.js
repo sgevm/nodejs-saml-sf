@@ -22,10 +22,7 @@ router.route("/api/v1/signin").post(function (req, res, next) {
     passport.authenticate("local", {
         failureRedirect: "/",
         successRedirect: "/home",
-    }),
-    function (req, res) {
-        console.log('/api/v1/signin...');
-    }
+    })
 );
 router.route("/api/v1/signup").post(Signup);
 router.route("/logout").get(Logout);
