@@ -15,11 +15,12 @@ const dbConfig = {
 
 const isProduction = process.env.NODE_ENV === "production";
 const connectionString = `postgresql://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PG_HOST}:${process.env.PG_PORT}/${process.env.PG_DATABASE}`;
+//const connectionString = process.env.DATABASE_URL; //HEROKU_POSTGRES
 var pool;
 if(isProduction){
   console.log('...db.js...production');
   pool = new Pool({
-    connectionString: connectionString,
+    connectionString: process.env.DATABASE_URL, //HEROKU_POSTGRES
     ssl: {
         rejectUnauthorized: false,
     }
