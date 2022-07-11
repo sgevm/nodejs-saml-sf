@@ -49,16 +49,16 @@ redisClient.connect().then(()=>{
     
     app.use(
         session({
-        store: new RedisStore({ client: redisClient }),
-        secret: SESSION_SECRET,
-        resave: false,
-        saveUninitialized: true,
-        cookie: {
-          secure: process.env.SESSION_SECURE_COOKIE,  // if true only transmit cookie over https
-          httpOnly: true, // if true prevent client side JS from reading the cookie
-          sameSite: 'none',
-          maxAge: 4 * 60 * 60, // session max age in milliseconds. 4 Hours.
-        }
+            store: new RedisStore({ client: redisClient }),
+            secret: SESSION_SECRET,
+            resave: false,
+            saveUninitialized: true,
+            cookie: {
+            secure: true,//process.env.SESSION_SECURE_COOKIE,  // if true only transmit cookie over https
+            httpOnly: true, // if true prevent client side JS from reading the cookie
+            sameSite: 'none',
+            maxAge: 4 * 60 * 60, // session max age in milliseconds. 4 Hours.
+            }
         })
     );
     app.use(passport.initialize());
