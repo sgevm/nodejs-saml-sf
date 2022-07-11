@@ -46,7 +46,7 @@ redisClient.connect().then(()=>{
     //Configure session middleware
     passportConfig();
     
-    //app.set('trust proxy', 1);    
+    app.set('trust proxy', 1);    
     app.use(
         session({
             store: new RedisStore({ client: redisClient }),
@@ -54,7 +54,7 @@ redisClient.connect().then(()=>{
             resave: false,
             saveUninitialized: true,
             cookie: {
-                domain: process.env.NODE_ENV === "production"?".sg-nodejs-template.herokuapp.com":"localhost",
+                domain: process.env.SESSION_COOKIE_DOMAIN, //".sg-nodejs-template.herokuapp.com":"localhost"
                 secure: process.env.NODE_ENV==="production",  // if true only transmit cookie over https
                 httpOnly: true, // if true prevent client side JS from reading the cookie
                 sameSite: 'none',
