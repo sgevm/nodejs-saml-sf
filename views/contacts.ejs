@@ -1,0 +1,58 @@
+<html lang="en">
+    <head>
+        <%- include('./head'); %>
+    </head>
+    <body>
+        <header>
+            <%- include('./header', {homeTabState:"", sessionsTabState: "", contactsTabState: "active"}); %>
+        </header>
+        <main>
+            <div class="container-fluid">
+                <div class="row content">
+                    <div class="col-sm-2 sidenav">
+                        <!-- <p><a href="#">Link</a></p>
+                        <p><a href="#">Link</a></p>
+                        <p><a href="#">Link</a></p> -->
+                    </div>         
+                    <div class="col-sm-8 text-left">        
+                        <section>          
+                            <% if(typeof contacts !== 'undefined'){ %>
+                                <% if(contacts){ %>
+                                    <table class="table">
+                                        <thead>
+                                          <tr>
+                                            <th scope="col">First Name</th>
+                                            <th scope="col">Last Name</th>
+                                            <th scope="col">Account</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% for(var i=0; i < contacts.length; i++){ %>
+                                                <tr>
+                                                    <td><%= contacts[i].FirstName %></td>
+                                                    <td><%= contacts[i].LastName %></td>
+                                                    <td><%= contacts[i].Account.Name %></td>
+                                                </tr>
+                                          <% }; %> 
+                                        </tbody>
+                                      </table>                                    
+                                <% } %>
+                            <% } %>
+                        </section>
+                    </div>
+                    <div class="col-sm-2 sidenav">
+                        <!-- <div class="well">
+                            <p>ADS</p>
+                        </div>
+                        <div class="well">
+                            <p>ADS</p>
+                        </div>             -->
+                    </div>
+                </div>
+            </div>
+        </main>
+        <header>
+            <%- include('./footer'); %>
+        </header>                   
+    </body>
+</html>

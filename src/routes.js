@@ -1,4 +1,27 @@
 //const redis = require("redis");
+const jwt = require('jsonwebtoken');
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
+
+
+var payload = {
+  iss: process.env.CLIENT_ID,
+  sub: process.env.SF_USERNAME,//dynamic users this must be the username
+  aud: process.env.LOGIN_URI,
+  exp: Math.floor(Date.now() / 1000) + 60 * 3
+}; 
+console.log('path:', path.join(__dirname,'server.key'));
+var privateKey = fs.readFileSync(path.join(__dirname,'server.key'));
+var token = jwt.sign(payload, privateKey, { algorithm: 'RS256' }); 
+var payloadString = `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${token}`;
+ 
+const axiosConfig = {
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded',
+  },
+};
+
 
 //Redis configurations
 var redisClientConfig = { 
@@ -44,7 +67,6 @@ const getAllExpressionSessions = (req) =>{
       var allSessions = sessions.map(sess => {
         var obj={id: sess.id};
         if (sess.passport) {
-          console.log('...sess.passport...', sess.passport);
           obj["username"]=sess.passport.user.username;
         }
         return obj;
@@ -54,6 +76,46 @@ const getAllExpressionSessions = (req) =>{
         resolve([]);
       }//if(sessions)
     });
+  });
+};
+
+const getSalesforceAccessToken = () => {
+  return new Promise((resolve, reject) => {
+      axios.post(process.env.TOKEN_URI, payloadString, axiosConfig).then((grant)=>{
+        resolve(grant.data);
+      }).catch((err)=>{
+        reject(err);
+      });
+  });
+}
+
+const getSalesforceAPI = (data) => {
+  return new Promise((resolve, reject) => {
+      const axiosConfigGET = {
+        headers: {
+          'Authorization': 'Bearer ' + data.access_token,
+        },
+      };
+      const resourceURL = data.instance_url+'/services/data/v54.0/query/?q=SELECT+FirstName,LastName,Account.Name+FROM+Contact+WHERE+AccountId<>NULL+LIMIT+10';
+      axios.get(resourceURL, axiosConfigGET).then((result)=>{
+      resolve(result.data);
+    }).catch((err)=>{
+      reject(err);
+    });
+  });
+}
+
+const getSalesforceContacts = () => {
+  return new Promise((resolve, reject) => {
+      getSalesforceAccessToken().then((data)=>{
+        getSalesforceAPI(data).then((result)=>{
+          resolve(result.records);
+        }).catch((err)=>{
+          reject(err);
+        });
+      }).catch((err)=>{
+        reject(err);
+      });
   });
 };
 
@@ -104,6 +166,23 @@ module.exports = function(app, passport) {
   (req, res, next)=>{
     console.log('/sessions ... after...', req.session);
     res.redirect("/sessions");
+  });
+
+  app.get("/contacts", logger, async (req, res) => { 
+    if (req.isAuthenticated()) {      
+      const contacts = await getSalesforceContacts();
+      //console.log('/contacts:', contacts);
+
+      res.render("contacts", {
+        user: req.user,
+        isAuthenticated: req.isAuthenticated,
+        sessionID: req.sessionID,
+        contacts: contacts
+      });
+    } else {
+      console.log('/contacts . home');
+      res.render("home", {user: null});
+    }
   });
 
   app.get("/login", 
