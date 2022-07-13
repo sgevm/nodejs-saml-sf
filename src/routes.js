@@ -60,7 +60,7 @@ const getAllExpressionSessions = (req) =>{
 module.exports = function(app, passport) {
 
   const logger = (req, res, next)=>{
-    console.log('...logger...', req.originalUrl, '- isAuthenticated():' + req.isAuthenticated(), req.session);
+    console.log('...logger...', req.originalUrl, '- isAuthenticated():' + req.isAuthenticated(), req.session, ' query:', req.query);
     next();
   };
 
@@ -77,7 +77,7 @@ module.exports = function(app, passport) {
     }
   });
 
-  app.get("/sessions", logger, async (req, res) => { 
+  app.get("/sessions", logger, async (req, res, next) => { 
     console.log('/sessions . sessions . req.isAuthenticated():', req.isAuthenticated());
     if (req.isAuthenticated()) {      
       //const sessions = await getRedisSessions();
@@ -92,9 +92,18 @@ module.exports = function(app, passport) {
 
       });
     } else {
-      console.log('/sessions . home');
-      res.render("home", {user: null});
+      // console.log('/sessions . home');
+      // res.render("home", {user: null});
+      next();
     }
+  },passport.authenticate('saml', {
+    successRedirect: "/sessions",
+    failureRedirect: "/",
+    failureFlash: true
+  }), 
+  (req, res, next)=>{
+    console.log('/sessions ... after...', req.session);
+    res.redirect("/sessions");
   });
 
   app.get("/login", 
