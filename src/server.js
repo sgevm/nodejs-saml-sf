@@ -6,11 +6,8 @@ const connectRedis = require("connect-redis");
 const passport = require("passport");
 const runDBInit = require("./models/db_init");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-const router = require("./routes/index");
-const { passportConfig } = require("./utils/passport");
+require("./passport")(passport);
+var app = express();
 
 //app middleware
 app.set("view engine", "ejs");
@@ -35,17 +32,30 @@ redisClient.on('error', err => {
     console.log('redisClient . Error ' + err);
 });
 
+redisClient.on('connect', err => {
+    console.log('redisClient.on(connect)');
+});
+
 redisClient.connect().then(()=>{
     console.log('redisClient.connect().then ... successful');
+    redisClient.set('framework', 'ReactJS');
     const RedisStore = connectRedis(session);
 
     //postgres db init
     console.log('calling db_init.runDBInit()');
     runDBInit();
-    
-    //Configure session middleware
-    passportConfig();
-    
+    console.log('after db_init.runDBInit()');
+    console.log('process.env.NODE_ENV:'+process.env.NODE_ENV);
+   
+    var cookieConfig={
+        //domain: process.env.SESSION_COOKIE_DOMAIN, //".sg-nodejs-template.herokuapp.com":"localhost"
+        secure: process.env.NODE_ENV==="production",  // if true only transmit cookie over https
+        httpOnly: true, // if true prevent client side JS from reading the cookie
+        sameSite: process.env.NODE_ENV==="production"?"none":"lax",
+        maxAge: 14400000 // session max age in milliseconds. 4 Hours = 4*60*60*1000
+    };
+    console.log('cookieConfig:', cookieConfig);
+
     app.set('trust proxy', 1);    
     app.use(
         session({
@@ -53,24 +63,21 @@ redisClient.connect().then(()=>{
             secret: process.env.SESSION_SECRET,
             resave: false,
             saveUninitialized: true,
-            cookie: {
-                domain: process.env.SESSION_COOKIE_DOMAIN, //".sg-nodejs-template.herokuapp.com":"localhost"
-                secure: process.env.NODE_ENV==="production",  // if true only transmit cookie over https
-                httpOnly: true, // if true prevent client side JS from reading the cookie
-                sameSite: 'none',
-                maxAge: 14400000 // session max age in milliseconds. 4 Hours 94*60*60*1000
-            }
+            cookie: cookieConfig
         })
     );
     app.use(passport.initialize());
     app.use(passport.session());
-    
-    
+
+    //Configure session middleware
+    //passportConfig();
+
     //Router middleware
-    app.use(router);
+    require("./routes")(app, passport);
     
+    const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
-     console.log(`Server started at port ${PORT}`);
+     console.log(`.....................Server started at port ${PORT}.....................`);
     });   
 
 }).catch(err => { 

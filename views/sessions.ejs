@@ -4,7 +4,7 @@
     </head>
     <body>
         <header>
-            <%- include('./header', {homeTabState:"active", sessionsTabState: ""}); %>
+            <%- include('./header', {homeTabState:"", sessionsTabState: "active"}); %>
         </header>
         <main>
             <div class="container-fluid">
@@ -16,15 +16,17 @@
                     </div>         
                     <div class="col-sm-8 text-left">        
                         <section>
-                            <h1>Welcome to Salesforce SAML app</h1>                     
-                            <% if(typeof isAuthenticated !== 'undefined'){ %>
-                                <% if(isAuthenticated){ %>
-                                <p class="center">                                
-                                    Hi <b><%= user.username %></b> <i>(<%= user.email %>)</i>
-                                </p>
-                                <p>
-                                    Your sessionID is <%= sessionID %>.
-                                </p>
+                            <p>Username: <%= user.username %></p>
+                            <p>My SessionId: <%= sessionID %></p>
+                            <h4>Sessions</h4>                     
+                            <% if(typeof sessions !== 'undefined'){ %>
+                                <% if(sessions){ %>
+                                    <ul>
+                                        <% for(var i=0; i < sessions.length; i++){ %>
+                                           <li><%= sessions[i].id %> - <%= sessions[i].username %></li>
+                                        <% }; %> 
+                                    </ul>
+                                    <a href="/clearsessions" class="btn btn-danger btn-md">Clear All Sessions</a>
                                 <% } %>
                             <% } %>
                         </section>

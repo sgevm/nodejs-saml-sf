@@ -13,6 +13,9 @@ const dbConfig = {
   idleTimeoutMillis: 1*60*60*1000,
 }
 
+console.log('...db...dbConfig:');
+console.log(dbConfig);
+
 const isProduction = process.env.NODE_ENV === "production";
 const connectionString = `postgresql://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PG_HOST}:${process.env.PG_PORT}/${process.env.PG_DATABASE}`;
 //const connectionString = process.env.DATABASE_URL; //HEROKU_POSTGRES
@@ -28,6 +31,26 @@ if(isProduction){
 }else{
   console.log('...db.js...development');
   pool = new Pool(dbConfig);
+  (async function() {
+    try{
+        const client = await pool.connect();
+        await client.query('SELECT NOW()', (err, res) => {          
+          console.log('...db...SELECT NOW()');
+          if(err){
+            console.log('...db...SELECT NOW()...err:');
+            console.log(err);  
+          }else{
+            console.log('...db...SELECT NOW()...res:');
+            console.log(res.rows[0]);  
+          }
+          client.release();
+        });        
+    }catch(e){
+      console.log('...db...pool.connect.error');
+      console.log(err);  
+    }
+  })();
+
 }
 
 pool.on('error', function (err) {
