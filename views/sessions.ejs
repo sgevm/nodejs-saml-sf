@@ -21,11 +21,22 @@
                             <h4>Sessions</h4>                     
                             <% if(typeof sessions !== 'undefined'){ %>
                                 <% if(sessions){ %>
-                                    <ul>
-                                        <% for(var i=0; i < sessions.length; i++){ %>
-                                           <li><%= sessions[i].id %> - <%= sessions[i].username %></li>
-                                        <% }; %> 
-                                    </ul>
+                                    <table class="table">
+                                        <thead>
+                                          <tr>
+                                            <th scope="col">Id</th>
+                                            <th scope="col">Username</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% for(var i=0; i < sessions.length; i++){ %>
+                                                <tr>
+                                                    <td><%= sessions[i].id %></td>
+                                                    <td><%= sessions[i].username %></td>
+                                                </tr>
+                                          <% }; %> 
+                                        </tbody>
+                                      </table>                                           
                                     <a href="/clearsessions" class="btn btn-danger btn-md">Clear All Sessions</a>
                                 <% } %>
                             <% } %>
