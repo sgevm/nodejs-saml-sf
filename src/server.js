@@ -5,9 +5,13 @@ const redis = require("redis");
 const connectRedis = require("connect-redis");
 const passport = require("passport");
 const runDBInit = require("./models/db_init");
+const path = require("path");
 
 require("./passport")(passport);
 var app = express();
+
+// Serve static files
+app.use(express.static(path.dirname(__dirname) + '/public'));
 
 //app middleware
 app.set("view engine", "ejs");

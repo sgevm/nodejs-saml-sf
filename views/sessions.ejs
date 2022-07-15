@@ -4,7 +4,7 @@
     </head>
     <body>
         <header>
-            <%- include('./header', {homeTabState:"", sessionsTabState: "active", contactsTabState: ""}); %>
+            <%- include('./header', {homeTabState:"", sessionsTabState: "active", contactsTabState: "", oauthcontactsTabState: ""}); %>
         </header>
         <main>
             <div class="container-fluid">
@@ -21,9 +21,9 @@
                             <h4>Sessions</h4>                     
                             <% if(typeof sessions !== 'undefined'){ %>
                                 <% if(sessions){ %>
-                                    <table class="table">
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_col-bordered">
                                         <thead>
-                                          <tr>
+                                          <tr class="slds-line-height_reset">
                                             <th scope="col">Id</th>
                                             <th scope="col">Username</th>
                                           </tr>

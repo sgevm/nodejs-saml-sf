@@ -1,14 +1,16 @@
 <nav class="navbar navbar-light bg-light">
     <div class="container-fluid">
-        <a class="navbar-brand">Logo</a>
+        <a href="https://www.designevo.com/" title="Free Online Logo Maker" class="navbar-brand">
+          <img src="/assets/images/logo_sudeep.png" width="72" height="80"/>
+        </a>
         <% if(typeof isAuthenticated !== 'undefined'){ %>
             <% if(isAuthenticated){ %>
-                <a href="/logout" class="btn btn-danger btn-md">Logout</a>
+                <a href="/logout" class="slds-button slds-button_destructive">Logout</a>
             <% }else{ %>
-                <a href="/login" class="btn btn-md">Login</a>
+                <a href="/login" class="slds-button slds-button_brand">Login</a>
             <% } %>
         <% }else{%>
-            <a href="/login" class="btn btn-dark btn-md">Login</a>
+            <a href="/login" class="slds-button slds-button_brand">Login</a>
         <% } %>
     </div>
 </nav>
@@ -24,6 +26,6 @@
       <a class="nav-link <%= contactsTabState %>"" href="/contacts">Contacts</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+      <a class="nav-link <%= oauthcontactsTabState %>"" href="/oauthcontacts">Contacts (oAuth)</a>
     </li>
   </ul>

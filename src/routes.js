@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const { log } = require('console');
 
 
 var payload = {
@@ -89,14 +90,14 @@ const getSalesforceAccessToken = () => {
   });
 }
 
-const getSalesforceAPI = (data) => {
+const getSalesforceAPI = (access_token, instance_url) => {
   return new Promise((resolve, reject) => {
       const axiosConfigGET = {
         headers: {
-          'Authorization': 'Bearer ' + data.access_token,
+          'Authorization': 'Bearer ' + access_token,
         },
       };
-      const resourceURL = data.instance_url+'/services/data/v54.0/query/?q=SELECT+FirstName,LastName,Account.Name+FROM+Contact+WHERE+AccountId<>NULL+LIMIT+10';
+      const resourceURL = instance_url+'/services/data/v54.0/query/?q=SELECT+FirstName,LastName,Account.Name+FROM+Contact+WHERE+AccountId<>NULL+LIMIT+10';
       axios.get(resourceURL, axiosConfigGET).then((result)=>{
       resolve(result.data);
     }).catch((err)=>{
@@ -108,7 +109,7 @@ const getSalesforceAPI = (data) => {
 const getSalesforceContacts = () => {
   return new Promise((resolve, reject) => {
       getSalesforceAccessToken().then((data)=>{
-        getSalesforceAPI(data).then((result)=>{
+        getSalesforceAPI(data.access_token, data.instance_url).then((result)=>{
           resolve(result.records);
         }).catch((err)=>{
           reject(err);
@@ -119,10 +120,61 @@ const getSalesforceContacts = () => {
   });
 };
 
+const getSFoAuthContacts = (access_token, instance_url) => {
+  return new Promise((resolve, reject) => {
+        getSalesforceAPI(access_token, instance_url).then((result)=>{
+          resolve(result.records);
+        }).catch((err)=>{
+          reject(err);
+        });
+  });
+};
+
+const getSFoAuthAuthorization = () => {
+  return new Promise((resolve, reject) => {
+    
+      const payload= { 
+        client_id: '3MVG9ZL0ppGP5UrBtr8Ou7yJoGTCwGTyi2VUQ3z7VPx7qo0D6CYCLVywdziArqlrPhzw7bnK8YQE5zXgmDToF',
+        redirect_uri: 'http://localhost:3000/oauth/callback',
+        response_type: 'code',
+        login_hint: 'sudeep.ghag@gmail.com'
+      };
+      const payloadstr=`client_id=${payload.client_id}&redirect_uri=${payload.redirect_uri}&response_type=${payload.response_type}&login_hint=${payload.login_hint}`;
+      const resourceURL = 'https://sudeepghag-dev-ed.my.salesforce.com/services/oauth2/authorize';
+      axios.post(resourceURL, payloadstr, axiosConfig).then((result)=>{
+      resolve(result.data);
+    }).catch((err)=>{
+      reject(err.response.data);
+    });
+  });
+}
+const getSFoAuthToken = (code) => {
+  return new Promise((resolve, reject) => {
+    
+      const payload= { 
+        grant_type: 'authorization_code',
+        code: code,
+        client_id: '3MVG9ZL0ppGP5UrBtr8Ou7yJoGTCwGTyi2VUQ3z7VPx7qo0D6CYCLVywdziArqlrPhzw7bnK8YQE5zXgmDToF',
+        client_secret: '1425C3272705AEC224EF7544BC6DB92B35989E1A317B7AAC052611DCA73A95ED',
+        redirect_uri: 'http://localhost:3000/oauth/callback',
+        response_type: 'code',
+        login_hint: 'sudeep.ghag@gmail.com'
+      };
+
+      const payloadstr=`grant_type=${payload.grant_type}&code=${payload.code}&client_id=${payload.client_id}&client_secret=${payload.client_secret}&redirect_uri=${payload.redirect_uri}&response_type=${payload.response_type}&login_hint=${payload.login_hint}`;
+      const resourceURL = 'https://sudeepghag-dev-ed.my.salesforce.com/services/oauth2/token';
+      axios.post(resourceURL, payloadstr, axiosConfig).then((result)=>{
+      resolve(result.data);
+    }).catch((err)=>{
+      reject(err.response.data);
+    });
+  });
+}
+
 module.exports = function(app, passport) {
 
   const logger = (req, res, next)=>{
-    console.log('...logger...', req.originalUrl, '- isAuthenticated():' + req.isAuthenticated(), req.session, ' query:', req.query);
+    console.log('...logger...', req.originalUrl, '- isAuthenticated():' + req.isAuthenticated(), req.session, ' query:', req.query, ' body:', req.body);
     next();
   };
 
@@ -177,7 +229,9 @@ module.exports = function(app, passport) {
         user: req.user,
         isAuthenticated: req.isAuthenticated,
         sessionID: req.sessionID,
-        contacts: contacts
+        contacts: contacts,
+        access_token: req.session.access_token,
+        refresh_token: req.session.refresh_token
       });
     } else {
       console.log('/contacts . home');
@@ -236,5 +290,66 @@ module.exports = function(app, passport) {
       });
     }
   });
+
+  app.get(
+    '/authorize',
+    logger,async (req, res) => { 
+      if (req.isAuthenticated()) {
+        try{
+          const data = await getSFoAuthAuthorization();     
+          res.send(data);
+        }catch(e){
+          console.log('/authorize . error:', e);
+          res.json(e);
+        }        
+      }else{
+        res.sendStatus(200);
+      }
+    }
+  );
+
+app.get(
+  '/oauth/callback',
+  logger, async (req, res, next)=>{
+    const code = req.query.code;
+    if (typeof code!=='undefined') {
+      const result = await getSFoAuthToken(code);
+      req.session.access_token = result.access_token;
+      req.session.refresh_token = result.refresh_token;
+      req.session.instance_url = result.instance_url;
+      res.redirect('/oauthcontacts');   
+    }else{
+      res.redirect('/home');
+    }
+    
+  }
+);
+
+app.get("/oauthcontacts", logger, async (req, res) => { 
+  if (req.isAuthenticated()) {
+    if (req.session.access_token && req.session.instance_url) {
+      const contacts = await getSFoAuthContacts(req.session.access_token, req.session.instance_url);
+
+      res.render("oauthcontacts", {
+        user: req.user,
+        isAuthenticated: req.isAuthenticated,
+        sessionID: req.sessionID,
+        contacts: contacts,
+        access_token: req.session.access_token,
+        refresh_token: req.session.refresh_token,
+        instance_url: req.session.instance_url
+      });      
+    }else{
+      res.render("oauthcontacts", {
+        user: req.user,
+        isAuthenticated: req.isAuthenticated,
+        sessionID: req.sessionID
+      });
+    }
+
+  } else {
+    res.render("home", {user: null});
+  }
+});
 
 };

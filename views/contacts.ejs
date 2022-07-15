@@ -4,7 +4,7 @@
     </head>
     <body>
         <header>
-            <%- include('./header', {homeTabState:"", sessionsTabState: "", contactsTabState: "active"}); %>
+            <%- include('./header', {homeTabState:"", sessionsTabState: "", contactsTabState: "active", oauthcontactsTabState: ""}); %>
         </header>
         <main>
             <div class="container-fluid">
@@ -18,13 +18,13 @@
                         <section>          
                             <% if(typeof contacts !== 'undefined'){ %>
                                 <% if(contacts){ %>
-                                    <table class="table">
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped slds-table_col-bordered">
                                         <thead>
-                                          <tr>
-                                            <th scope="col">First Name</th>
-                                            <th scope="col">Last Name</th>
-                                            <th scope="col">Account</th>
-                                          </tr>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col">First Name</th>
+                                                <th scope="col">Last Name</th>
+                                                <th scope="col">Account</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
                                             <% for(var i=0; i < contacts.length; i++){ %>
