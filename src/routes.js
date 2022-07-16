@@ -12,6 +12,17 @@ var payload = {
   aud: process.env.LOGIN_URI,
   exp: Math.floor(Date.now() / 1000) + 60 * 3
 }; 
+
+const oauthPayload= { 
+  grant_type: process.env.OAUTH_GRANT_TYPE,
+  code: code,
+  client_id: process.env.OAUTH_CLIENT_ID,
+  client_secret: process.env.OAUTH_CLIENT_SECRET,
+  redirect_uri: process.env.OAUTH_CLIENT_SECRET,
+  response_type: process.env.OAUTH_RESPONSE_TYPE,
+  login_hint: process.env.OAUTH_LOGIN_HINT
+};
+
 console.log('path:', path.join(__dirname,'server.key'));
 var privateKey = fs.readFileSync(path.join(__dirname,'server.key'));
 var token = jwt.sign(payload, privateKey, { algorithm: 'RS256' }); 
@@ -134,14 +145,13 @@ const getSFoAuthAuthorization = () => {
   return new Promise((resolve, reject) => {
     
       const payload= { 
-        client_id: '3MVG9ZL0ppGP5UrBtr8Ou7yJoGTCwGTyi2VUQ3z7VPx7qo0D6CYCLVywdziArqlrPhzw7bnK8YQE5zXgmDToF',
-        redirect_uri: 'http://localhost:3000/oauth/callback',
-        response_type: 'code',
-        login_hint: 'sudeep.ghag@gmail.com'
+        client_id: process.env.OAUTH_CLIENT_ID,
+        redirect_uri: process.env.OAUTH_REDIRECT_URI,
+        response_type: process.env.OAUTH_RESPONSE_TYPE,
+        login_hint: process.env.OAUTH_LOGIN_HINT
       };
-      const payloadstr=`client_id=${payload.client_id}&redirect_uri=${payload.redirect_uri}&response_type=${payload.response_type}&login_hint=${payload.login_hint}`;
-      const resourceURL = 'https://sudeepghag-dev-ed.my.salesforce.com/services/oauth2/authorize';
-      axios.post(resourceURL, payloadstr, axiosConfig).then((result)=>{
+      const payloadstr=`client_id=${oauthPayload.client_id}&redirect_uri=${oauthPayload.redirect_uri}&response_type=${oauthPayload.response_type}&login_hint=${oauthPayload.login_hint}`;
+      axios.post(process.env.OAUTH_AUTH_URI, payloadstr, axiosConfig).then((result)=>{
       resolve(result.data);
     }).catch((err)=>{
       reject(err.response.data);
@@ -150,20 +160,8 @@ const getSFoAuthAuthorization = () => {
 }
 const getSFoAuthToken = (code) => {
   return new Promise((resolve, reject) => {
-    
-      const payload= { 
-        grant_type: 'authorization_code',
-        code: code,
-        client_id: '3MVG9ZL0ppGP5UrBtr8Ou7yJoGTCwGTyi2VUQ3z7VPx7qo0D6CYCLVywdziArqlrPhzw7bnK8YQE5zXgmDToF',
-        client_secret: '1425C3272705AEC224EF7544BC6DB92B35989E1A317B7AAC052611DCA73A95ED',
-        redirect_uri: 'http://localhost:3000/oauth/callback',
-        response_type: 'code',
-        login_hint: 'sudeep.ghag@gmail.com'
-      };
-
-      const payloadstr=`grant_type=${payload.grant_type}&code=${payload.code}&client_id=${payload.client_id}&client_secret=${payload.client_secret}&redirect_uri=${payload.redirect_uri}&response_type=${payload.response_type}&login_hint=${payload.login_hint}`;
-      const resourceURL = 'https://sudeepghag-dev-ed.my.salesforce.com/services/oauth2/token';
-      axios.post(resourceURL, payloadstr, axiosConfig).then((result)=>{
+      const payloadstr=`grant_type=${oauthPayload.grant_type}&code=${oauthPayload.code}&client_id=${oauthPayload.client_id}&client_secret=${oauthPayload.client_secret}&redirect_uri=${oauthPayload.redirect_uri}&response_type=${oauthPayload.response_type}&login_hint=${oauthPayload.login_hint}`;
+      axios.post(process.env.OAUTH_TOKEN_URI, payloadstr, axiosConfig).then((result)=>{
       resolve(result.data);
     }).catch((err)=>{
       reject(err.response.data);
